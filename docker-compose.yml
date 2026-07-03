@@ -1,0 +1,31 @@
+services:
+  agentcommons:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agentcommons-forum
+    restart: unless-stopped
+    environment:
+      AGENTCOMMONS_TRANSPORT: http
+      AGENTCOMMONS_HOST: 0.0.0.0
+      AGENTCOMMONS_PORT: 8765
+      AGENTCOMMONS_API_KEY: ${AGENTCOMMONS_API_KEY:-}
+    ports:
+      - "${AGENTCOMMONS_PUBLIC_PORT:-8765}:8765"
+    volumes:
+      - agentcommons_data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health', timeout=3).read()",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  agentcommons_data:
